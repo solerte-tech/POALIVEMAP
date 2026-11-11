@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "POA Live Map",
+    "slug": "poa-live-map",
+    "scheme": "poalivemap",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E1620"
+    },
+    "ios": {
+      "bundleIdentifier": "br.com.poalivemap.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Usamos sua localização para mostrar eventos e rotas perto de você em Porto Alegre."
+      },
+      "config": { "googleMapsApiKey": "COLOQUE_SUA_CHAVE_AQUI" }
+    },
+    "android": {
+      "package": "br.com.poalivemap.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0E1620"
+      },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "config": { "googleMaps": { "apiKey": "COLOQUE_SUA_CHAVE_AQUI" } }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        { "locationWhenInUsePermission": "Usamos sua localização para mostrar eventos e rotas perto de você." }
+      ]
+    ],
+    "experiments": { "typedRoutes": true }
+  }
+}
