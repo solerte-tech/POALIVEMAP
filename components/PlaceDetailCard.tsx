@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 import { CATEGORY_META, CROWD_META } from "@/constants/theme";
+import { xpFor } from "@/store/GameContext";
 import { openRoute, openTicket } from "@/services/linking";
 import { Place } from "@/types/place";
 
-type Props = { place: Place; onClose: () => void };
+type Props = { place: Place; stamped: boolean; onCheckIn: () => void; onClose: () => void };
 
 /** Card inferior com detalhes do local ou evento selecionado. */
-export function PlaceDetailCard({ place, onClose }: Props) {
+export function PlaceDetailCard({ place, stamped, onCheckIn, onClose }: Props) {
   const cat = CATEGORY_META[place.category];
   const crowd = CROWD_META[place.crowd];
 
@@ -45,7 +46,18 @@ export function PlaceDetailCard({ place, onClose }: Props) {
 
       <Text className="text-mute text-xs mt-3">{place.address}</Text>
 
-      <View className="flex-row gap-3 mt-5">
+      <Pressable
+        onPress={onCheckIn}
+        disabled={stamped}
+        className={`flex-row items-center justify-center gap-2 rounded-2xl py-3 mt-5 ${stamped ? "bg-night border border-live" : "bg-live active:opacity-80"}`}
+      >
+        <Ionicons name={stamped ? "checkmark-circle" : "ribbon"} size={18} color={stamped ? "#3DD6C3" : "#0E1620"} />
+        <Text className={`font-bold ${stamped ? "text-live" : "text-night"}`}>
+          {stamped ? "Carimbo coletado" : `Fazer check-in  +${xpFor(place)} XP`}
+        </Text>
+      </Pressable>
+
+      <View className="flex-row gap-3 mt-3">
         <Pressable
           onPress={() => openRoute(place)}
           className="flex-1 flex-row items-center justify-center gap-2 rounded-2xl border border-line py-3 active:opacity-70"

@@ -8,11 +8,14 @@ Feito com **React Native + Expo (TypeScript)**, **Expo Router**, **react-native-
 ```
 poa-live-map/
 ├── app/                    # Rotas (Expo Router)
-│   ├── _layout.tsx         # Layout raiz
+│   ├── _layout.tsx         # Layout raiz + GameProvider
+│   ├── index.tsx           # Tela de abertura (radar + ponto de partida)
 │   └── (tabs)/
 │       ├── _layout.tsx     # Barra de abas
-│       └── index.tsx       # Tela do mapa
+│       ├── map.tsx         # Mapa com HUD, check-in e XP
+│       └── quests.tsx      # Missões e passaporte de carimbos
 ├── components/             # PlaceMarker, CategoryFilter, PlaceDetailCard
+├── store/GameContext.tsx   # XP, nível, carimbos, missões
 ├── constants/theme.ts      # Cores, categorias, região inicial, estilo do mapa
 ├── data/places.ts          # Dados de exemplo
 ├── services/               # placesService, locationService, linking
@@ -21,6 +24,14 @@ poa-live-map/
 ├── app.json  eas.json  babel.config.js  metro.config.js
 └── tailwind.config.js  global.css  tsconfig.json
 ```
+
+## Como funciona o jogo
+
+- Escolha onde chegou (Rodoviária ou Aeroporto) e o mapa abre ali.
+- Toque num local e faça **check-in** para ganhar XP (50 + 25 se estiver ao vivo) e um carimbo.
+- A cada 100 XP você sobe de nível. Complete missões e preencha o passaporte.
+- `DEMO_MODE` em `store/GameContext.tsx` libera check-in de qualquer lugar. Em produção, mude para `false` (exige estar a 300 m do local).
+- O layout muda em telas largas (≥ 768 px): o card de detalhes vira painel lateral.
 
 ## Pré-requisitos
 

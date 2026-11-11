@@ -4,9 +4,9 @@ import { Marker } from "react-native-maps";
 import { CATEGORY_META, COLORS } from "@/constants/theme";
 import { Place } from "@/types/place";
 
-type Props = { place: Place; selected: boolean; onPress: (p: Place) => void };
+type Props = { place: Place; selected: boolean; stamped?: boolean; onPress: (p: Place) => void };
 
-export function PlaceMarker({ place, selected, onPress }: Props) {
+export function PlaceMarker({ place, selected, stamped, onPress }: Props) {
   const meta = CATEGORY_META[place.category];
   return (
     <Marker
@@ -20,14 +20,14 @@ export function PlaceMarker({ place, selected, onPress }: Props) {
           width: selected ? 44 : 36,
           height: selected ? 44 : 36,
           borderRadius: 22,
-          backgroundColor: COLORS.night,
+          backgroundColor: stamped ? meta.color : COLORS.night,
           borderWidth: 2,
           borderColor: meta.color,
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Ionicons name={meta.icon as any} size={selected ? 22 : 18} color={meta.color} />
+        <Ionicons name={meta.icon as any} size={selected ? 22 : 18} color={stamped ? COLORS.night : meta.color} />
         {place.isLive && (
           <View
             style={{
