@@ -1,16 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Platform, Pressable, Text, useWindowDimensions, View } from "react-native";
-import MapView, { PROVIDER_GOOGLE, Region } from "react-native-maps";
+import { Animated, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { HudBar } from "@/components/HudBar";
 import { PlaceDetailCard } from "@/components/PlaceDetailCard";
-import { PlaceMarker } from "@/components/PlaceMarker";
-import { DARK_MAP_STYLE } from "@/constants/theme";
+import { GameMap } from "@/components/GameMap";
 import { getUserLocation } from "@/services/locationService";
 import { getPlaces } from "@/services/placesService";
 import { DEMO_MODE, useGame } from "@/store/GameContext";
+import { GameMapHandle, Region } from "@/types/map";
 import { Place, PlaceCategory } from "@/types/place";
 
 export default function MapScreen() {
@@ -18,7 +17,7 @@ export default function MapScreen() {
   const { width } = useWindowDimensions();
   const wide = width >= 768; // tablets e telas grandes: card vira painel lateral
   const game = useGame();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<GameMapHandle>(null);
 
   const [places, setPlaces] = useState<Place[]>([]);
   const [category, setCategory] = useState<PlaceCategory | null>(null);
@@ -42,7 +41,7 @@ export default function MapScreen() {
     [places, category, liveOnly]
   );
 
-  const focus = (r: Region) => mapRef.current?.animateToRegion(r, 600);
+  const focus = (r: Region) => mapRef.current?.focus(r);
 
   const showToast = (m: string) => {
     setMsg(m);
@@ -63,31 +62,18 @@ export default function MapScreen() {
 
   return (
     <View className="flex-1 bg-night">
-      <MapView
+      <GameMap
         ref={mapRef}
-        style={{ flex: 1 }}
-        provider={Platform.OS === "android" ? PROVIDER_GOOGLE : undefined}
-        customMapStyle={DARK_MAP_STYLE}
-        userInterfaceStyle="dark"
+        places={visible}
+        selectedId={selected?.id}
+        stampedIds={game.stampIds}
         initialRegion={initialRegion}
-        showsUserLocation
-        showsMyLocationButton={false}
-        toolbarEnabled={false}
-        onPress={() => setSelected(null)}
-      >
-        {visible.map((p) => (
-          <PlaceMarker
-            key={p.id}
-            place={p}
-            selected={selected?.id === p.id}
-            stamped={game.stampIds.includes(p.id)}
-            onPress={(pl) => {
-              setSelected(pl);
-              focus({ latitude: pl.latitude - (wide ? 0 : 0.003), longitude: pl.longitude, latitudeDelta: 0.012, longitudeDelta: 0.012 });
-            }}
-          />
-        ))}
-      </MapView>
+        onMapPress={() => setSelected(null)}
+        onSelect={(pl) => {
+          setSelected(pl);
+          focus({ latitude: pl.latitude - (wide ? 0 : 0.003), longitude: pl.longitude, latitudeDelta: 0.012, longitudeDelta: 0.012 });
+        }}
+      />
 
       {/* Topo: HUD + filtros */}
       <View className="absolute left-0 right-0" style={{ top: insets.top + 8 }} pointerEvents="box-none">

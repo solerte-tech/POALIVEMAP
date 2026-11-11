@@ -33,6 +33,17 @@ poa-live-map/
 - `DEMO_MODE` em `store/GameContext.tsx` libera check-in de qualquer lugar. Em produção, mude para `false` (exige estar a 300 m do local).
 - O layout muda em telas largas (≥ 768 px): o card de detalhes vira painel lateral.
 
+## Versão web (GitHub Pages)
+
+O GitHub Pages só publica sites; ele **não executa** apps nativos. Por isso, se o Pages estiver configurado para publicar a branch, ele mostra apenas este README.
+Este projeto também compila para web (mapa com Leaflet + OpenStreetMap/CARTO). Para publicar:
+
+1. No GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Envie o código para a branch `main` (`git push`). O workflow `.github/workflows/deploy-web.yml` gera e publica o site.
+3. Acesse `https://SEU_USUARIO.github.io/NOME_DO_REPO/` (aguarde 1 a 3 minutos).
+
+Testar a web localmente: `npx expo start --web`.
+
 ## Pré-requisitos
 
 - Node.js 20 ou superior

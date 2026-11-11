@@ -19,7 +19,9 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos sua localização para mostrar eventos e rotas perto de você em Porto Alegre."
       },
-      "config": { "googleMapsApiKey": "COLOQUE_SUA_CHAVE_AQUI" }
+      "config": {
+        "googleMapsApiKey": "COLOQUE_SUA_CHAVE_AQUI"
+      }
     },
     "android": {
       "package": "br.com.poalivemap.app",
@@ -27,16 +29,34 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#0E1620"
       },
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
-      "config": { "googleMaps": { "apiKey": "COLOQUE_SUA_CHAVE_AQUI" } }
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "COLOQUE_SUA_CHAVE_AQUI"
+        }
+      }
     },
     "plugins": [
       "expo-router",
       [
         "expo-location",
-        { "locationWhenInUsePermission": "Usamos sua localização para mostrar eventos e rotas perto de você." }
+        {
+          "locationWhenInUsePermission": "Usamos sua localização para mostrar eventos e rotas perto de você."
+        }
       ]
     ],
-    "experiments": { "typedRoutes": true }
+    "experiments": {
+      "typedRoutes": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/icon.png",
+      "name": "POA Live Map",
+      "backgroundColor": "#0E1620"
+    }
   }
 }
