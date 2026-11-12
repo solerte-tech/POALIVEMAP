@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#060818">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Curta Poa">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><link rel="icon" href="icons/icon-192.png">
+<title>Curta Mais Poa</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+:root{--bg:#060818;--p:rgba(10,14,46,.8);--cy:#00F0FF;--mg:#FF2E9A;--vi:#8A5CFF;--li:#B6FF3B;--am:#FFB020;--tx:#E8F6FF}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Space Grotesk",system-ui,sans-serif;color:var(--tx);background:var(--bg)}
+#map{position:absolute;inset:0}
+#vig{position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 50% 55%,transparent 45%,#060818cc 100%),linear-gradient(#060818aa,transparent 22%)}
+h1,h2{font-family:Orbitron,"Space Grotesk",sans-serif;letter-spacing:.02em}
+.glass{background:var(--p);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #00f0ff55;box-shadow:0 0 22px #00f0ff22,inset 0 0 18px #8a5cff22}
+.top{position:absolute;top:0;left:0;right:0;max-width:480px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 0;display:flex;flex-direction:column;gap:8px;z-index:2}
+.brand{border-radius:16px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.brand h1{font-size:17px;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--mg));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand span{font-size:12px;color:var(--am)}
+.modes{display:flex;gap:6px}
+.modes button{flex:1;min-height:44px;border-radius:14px;color:var(--tx);font:600 13px "Space Grotesk",sans-serif;cursor:pointer}
+.modes button[aria-pressed=true]{background:linear-gradient(90deg,var(--cy),var(--vi));color:#04101c;border-color:transparent;box-shadow:0 0 18px #00f0ffaa}
+nav{position:absolute;z-index:3;left:0;right:0;bottom:0;display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));border-radius:20px 20px 0 0;border-bottom:0}
+nav button{flex:1;min-height:56px;border:0;background:none;color:#7f93c9;font:12px "Space Grotesk",sans-serif;display:grid;place-items:center;gap:2px;cursor:pointer}
+nav button[aria-current=page]{color:var(--cy);filter:drop-shadow(0 0 6px var(--cy))}
+nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8}
+#sheet{position:absolute;z-index:5;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;max-height:86%;overflow:auto;border-radius:26px 26px 0 0;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .3s}
+#sheet.on{transform:none}
+#sheet .x{position:sticky;top:8px;float:right;margin:8px 10px 0 0;z-index:2;width:44px;height:44px;border-radius:50%;border:1px solid #00f0ff88;background:#060818cc;color:var(--cy);font-size:18px;cursor:pointer}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;padding:14px 12px 8px}
+.gal img{flex:0 0 86%;width:86%;height:200px;object-fit:cover;border-radius:18px;scroll-snap-align:center;border:1px solid #00f0ff55;background:#0a0e2e}
+.sb{padding:4px 16px}
+.sb h2{font-size:21px;margin:6px 0}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;border:1px solid var(--cy);color:var(--cy);margin:0 6px 6px 0}
+.tag.ev{background:linear-gradient(90deg,var(--mg),var(--vi));border-color:transparent;color:#fff;box-shadow:0 0 14px #ff2e9a99}
+.sb p{margin:6px 0;line-height:1.45}.sb small{color:#9db0dd}
+.bar{height:10px;border-radius:6px;background:#1a2260;margin:10px 0 4px;overflow:hidden}.bar i{display:block;height:100%;border-radius:6px;box-shadow:0 0 10px currentColor}
+.row{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;min-height:46px;border:0;border-radius:14px;font:600 14px "Space Grotesk",sans-serif;cursor:pointer;background:linear-gradient(90deg,var(--cy),var(--vi));color:#04101c;box-shadow:0 0 16px #00f0ff77}
+.btn.alt{background:transparent;color:var(--cy);border:1px solid var(--cy);box-shadow:none}
+#recenter{position:absolute;z-index:2;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));min-height:44px;padding:0 16px;border-radius:22px;color:var(--cy);font:600 13px "Space Grotesk",sans-serif;display:none;cursor:pointer}
+#toast{position:absolute;z-index:4;top:calc(150px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:12px 16px;border-radius:14px;max-width:88%;text-align:center;display:none;border-color:var(--mg);box-shadow:0 0 24px #ff2e9a88;font-size:14px}
+#onb{position:absolute;inset:0;z-index:6;background:radial-gradient(circle at 20% 10%,#2b1580 0,#060818 55%);padding:calc(36px + env(safe-area-inset-top,0px)) 22px 28px;display:flex;flex-direction:column;gap:16px}
+#onb>*{max-width:520px;width:100%;margin-inline:auto}
+#onb h1{font-size:30px;line-height:1.15;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--mg),var(--li));-webkit-background-clip:text;background-clip:text;color:transparent}
+#onb p{color:#b7c6ef}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:44px;padding:0 16px;border-radius:22px;border:1.5px solid #00f0ff88;background:#0a0e2e99;color:var(--tx);font:600 14px "Space Grotesk",sans-serif;cursor:pointer}
+.chips button[aria-pressed=true]{background:linear-gradient(90deg,var(--mg),var(--vi));border-color:transparent;box-shadow:0 0 16px #ff2e9a88}
+#onb .btn{margin-top:auto}
+button:focus-visible{outline:3px solid var(--li);outline-offset:2px}
+.pin{display:flex;align-items:center;gap:6px;border-radius:20px;color:var(--tx);padding:5px 11px 5px 7px;font:600 12px "Space Grotesk",sans-serif;cursor:pointer;white-space:nowrap;position:relative;margin-bottom:8px;background:#0a0e2eee}
+.pin::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#0a0e2e}
+.pin i{width:12px;height:12px;border-radius:50%;box-shadow:0 0 10px currentColor}
+.pin.mine{box-shadow:0 0 0 2px var(--li),0 0 16px var(--li)}
+.orbw{width:64px;height:64px;cursor:pointer}
+.orb{position:relative;width:64px;height:64px;display:grid;place-items:center;transition:transform .4s}
+.orb b{width:22px;height:22px;border-radius:50%;background:radial-gradient(#fff,#ff8fd0 45%,var(--mg));box-shadow:0 0 18px 6px #ff2e9acc,0 0 44px 14px #8a5cff88;animation:core 1.2s ease-in-out infinite}
+.orb::before,.orb::after{content:"";position:absolute;inset:0;border-radius:50%;border:3px solid var(--mg);animation:pl 1.8s ease-out infinite}
+.orb::after{animation-delay:.9s;border-color:var(--cy)}
+.orb em{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font:600 11px "Space Grotesk",sans-serif;font-style:normal;white-space:nowrap;background:var(--mg);padding:3px 9px;border-radius:10px;display:none;box-shadow:0 0 14px var(--mg)}
+.hot .orb{transform:scale(1.7)}.hot .orb em{display:block;transform:translateX(-50%) scale(.6)}
+@keyframes pl{0%{transform:scale(.3);opacity:1}100%{transform:scale(1.5);opacity:0}}
+@keyframes core{50%{transform:scale(1.3)}}
+.me{width:46px;height:46px;border-radius:50%;background:#060818;border:3px solid var(--cy);display:grid;place-items:center;font-size:22px;box-shadow:0 0 0 7px #00f0ff33,0 0 22px var(--cy)}
+.maplibregl-ctrl-attrib{background:#060818aa!important;color:#9db0dd!important}.maplibregl-ctrl-attrib a{color:var(--cy)!important}
+@media(prefers-reduced-motion:reduce){.orb b,.orb::before,.orb::after{animation:none}#sheet{transition:none}}
+</style></head>
+<body>
+<div id="map"></div><div id="vig"></div>
+<div class="top"><div class="brand glass"><h1>CURTA MAIS POA</h1><span>Pôr do sol 18h52 (exemplo)</span></div><div class="modes" id="modes"></div></div>
+<button id="recenter" class="glass">Seguir você</button><div id="toast" class="glass"></div>
+<div id="sheet" class="glass" role="dialog" aria-live="polite"></div>
+<nav id="nav" class="glass"></nav>
+<section id="onb"><h1>Porto Alegre, num mapa vivo.</h1><p>Escolha o que você curte. Acendemos no mapa o que está acontecendo agora perto de você.</p><div class="chips" id="chips"></div><button class="btn" id="go">Explorar o mapa</button></section>
+<script>
+const $=s=>document.querySelector(s);
+const INT=['Gastronomia','Cultura','Música ao vivo','Pôr do sol','Em família','Gastando pouco'];
+const MODOS={pe:{n:'A pé',v:1.4,z:17.4,i:'🚶'},carro:{n:'Carro',v:11,z:16.3,i:'🚗'},uber:{n:'Uber',v:11,z:16.3,i:'🚕'},pat:{n:'Patinete',v:5,z:16.9,i:'🛴'}};
+const SPEEDUP=8; // acelera a viagem na demonstração
+// Coordenadas aproximadas e textos de exemplo: confira antes de divulgar. Fotos: pasta fotos/.
+const POIS=[
+ {id:'mercado',n:'Mercado Público',cat:'Gastronomia',lat:-30.0285,lng:-51.2277,l:.72,end:'Largo Glênio Peres, Centro Histórico',d:'Inaugurado em 1869, reúne bancas, cafés, restaurantes e o ponto de encontro mais tradicional do Centro.',dica:'Passe pelas bancas de produtos locais e tome um café.',ev:'Happy hour com música ao vivo (exemplo)',int:['Gastronomia','Gastando pouco']},
+ {id:'ccmq',n:'Casa de Cultura Mario Quintana',cat:'Cultura',lat:-30.0298,lng:-51.2301,l:.35,end:'Rua dos Andradas, 736, Centro Histórico',d:'Instalada no antigo Hotel Majestic, onde o poeta Mario Quintana morou. Tem cinema, teatro, galerias, livraria e café.',dica:'Suba até o terraço e veja o Centro de cima.',ev:'Sarau de poesia no fim da tarde (exemplo)',int:['Cultura','Gastando pouco']},
+ {id:'gasometro',n:'Usina do Gasômetro',cat:'Cultura e pôr do sol',lat:-30.0340,lng:-51.2436,l:.5,end:'Av. Presidente João Goulart, 551',d:'Antiga usina termelétrica transformada em centro cultural, com a chaminé símbolo e um dos pores do sol mais famosos da cidade.',dica:'Chegue 40 minutos antes do pôr do sol para garantir lugar.',ev:'Música ao vivo no pôr do sol (exemplo)',int:['Cultura','Música ao vivo','Pôr do sol']},
+ {id:'saopedro',n:'Theatro São Pedro',cat:'Cultura',lat:-30.0326,lng:-51.2313,l:.3,end:'Praça Marechal Deodoro, Centro Histórico',d:'Teatro inaugurado em 1858, referência das artes cênicas e da música no Rio Grande do Sul.',dica:'Confira a programação e visitas guiadas no site oficial.',ev:'Espetáculo hoje às 20h (exemplo)',int:['Cultura','Música ao vivo']},
+ {id:'matriz',n:'Praça da Matriz',cat:'Passeio histórico',lat:-30.0323,lng:-51.2320,l:.2,end:'Centro Histórico',d:'Cercada pela Catedral Metropolitana, pelo Palácio Piratini e pelo Memorial do RS.',dica:'Ótima para um passeio tranquilo a pé.',int:['Cultura','Gastando pouco','Em família']},
+ {id:'orla',n:'Orla do Guaíba',cat:'Natureza e pôr do sol',lat:-30.0455,lng:-51.2385,l:.38,end:'Av. Edvaldo Pereira Paiva',d:'Calçadão à beira do Guaíba para caminhar, pedalar e ver o sol baixar.',dica:'Leve água e ficará perfeito para o fim do dia.',int:['Pôr do sol','Em família','Gastando pouco']}];
+const cor=l=>l<.4?'#B6FF3B':l<.65?'#FFB020':'#FF2E9A';
+let modo='pe',sel=new Set(),me={lng:-51.2181,lat:-30.0237},follow=false,run=null,hdg=250,dip=null;
+
+// ---------- mapa futurista ----------
+const map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/liberty',center:[me.lng,me.lat],zoom:16.4,pitch:68,bearing:250,maxPitch:85,attributionControl:{compact:true}});
+const toast=t=>{const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.display='none',4500)};
+map.on('error',()=>{if(!map.loaded())toast('Sem conexão com o mapa. Verifique a internet.')});
+map.on('load',()=>{
+ const L=map.getStyle().layers,bl=L.find(l=>l['source-layer']==='building'),first=L.find(l=>l.type!=='background'&&l.type!=='fill');
+ map.addSource('sat',{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:19,attribution:'Imagens © Esri, Maxar, Earthstar Geographics'});
+ map.addLayer({id:'sat',type:'raster',source:'sat',paint:{'raster-saturation':-.6,'raster-contrast':.3,'raster-brightness-max':.55,'raster-hue-rotate':210}},L[0].id);
+ map.addLayer({id:'tint',type:'background',paint:{'background-color':'#2a0a8a','background-opacity':.38}},first.id);
+ L.forEach(l=>{const sl=l['source-layer'];try{
+  if(l.type==='background'||(l.type==='fill'&&sl!=='building'))map.setLayoutProperty(l.id,'visibility','none');
+  else if(l.type==='line'&&sl==='transportation'){if(/casing|bridge_.*_casing/.test(l.id))map.setLayoutProperty(l.id,'visibility','none');else{map.setPaintProperty(l.id,'line-color','#00F0FF');map.setPaintProperty(l.id,'line-opacity',.6)}}
+  else if(l.type==='line'&&sl==='waterway'){map.setPaintProperty(l.id,'line-color','#8A5CFF')}
+  else if(l.type==='fill-extrusion'){map.setPaintProperty(l.id,'fill-extrusion-color',['interpolate',['linear'],['coalesce',['get','render_height'],10],0,'#101a5c',50,'#3b2bb5',140,'#d23bff']);map.setPaintProperty(l.id,'fill-extrusion-opacity',.92)}
+  else if(l.type==='symbol'&&l.layout&&l.layout['text-field']){map.setPaintProperty(l.id,'text-color','#E8F6FF');map.setPaintProperty(l.id,'text-halo-color','#060818');map.setPaintProperty(l.id,'text-halo-width',1.6)}
+ }catch(e){}});
+ if(bl)map.addLayer({id:'bld-edge',type:'line',source:bl.source,'source-layer':'building',minzoom:15,paint:{'line-color':'#00F0FF','line-opacity':.55,'line-width':.9}});
+ try{map.setLight({anchor:'viewport',color:'#7ad7ff',intensity:.5,position:[1.5,210,60]})}catch(e){}
+ map.addSource('rota',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+ map.addLayer({id:'rota-g',type:'line',source:'rota',paint:{'line-color':'#FF2E9A','line-width':16,'line-blur':8,'line-opacity':.7},layout:{'line-cap':'round','line-join':'round'}});
+ map.addLayer({id:'rota',type:'line',source:'rota',paint:{'line-color':'#00F0FF','line-width':5},layout:{'line-cap':'round','line-join':'round'}});
+});
+
+// ---------- marcadores e luzes de evento ----------
+POIS.forEach(p=>{
+ if(p.ev){const w=document.createElement('div');w.className='orbw';w.innerHTML='<div class="orb"><b></b><em>Evento! Toque</em></div>';w.setAttribute('role','button');w.setAttribute('aria-label','Evento em '+p.n);
+  w.onclick=e=>{e.stopPropagation();abrir(p)};p.w=w;new maplibregl.Marker({element:w,anchor:'center'}).setLngLat([p.lng,p.lat]).addTo(map)}
+ const el=document.createElement('button');el.className='pin glass';
+ el.innerHTML=`<i style="color:${cor(p.l)};background:${cor(p.l)}"></i>${p.ev?'★ ':''}${p.n}`;
+ el.onclick=e=>{e.stopPropagation();abrir(p)};p.el=el;
+ new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([p.lng,p.lat]).addTo(map)});
+const meEl=document.createElement('div');meEl.className='me';meEl.textContent=MODOS[modo].i;
+const meM=new maplibregl.Marker({element:meEl,anchor:'center'}).setLngLat([me.lng,me.lat]).addTo(map);
+
+// ---------- janela com fotos e informações ----------
+const LEG=['Fachada','Entorno','À noite'],PAL=[['#00F0FF','#8A5CFF'],['#FF2E9A','#8A5CFF'],['#B6FF3B','#00F0FF']];
+function art(p,i){const [a,b]=PAL[i%3],s=p.id.length*13+i*7;let x=0,B='';
+ for(let k=0;k<9;k++){const w=30+((s*(k+3))%24),h=60+((s*(k+5))%110);B+=`<rect x="${x}" y="${230-h}" width="${w}" height="${h}" fill="#0a0f33" stroke="${a}" stroke-width="1.5"/>`;x+=w+4}
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${a}" stop-opacity=".25"/></linearGradient></defs><rect width="400" height="260" fill="#060818"/><rect width="400" height="260" fill="url(#g)"/><circle cx="320" cy="70" r="34" fill="${a}" opacity=".9"/>${B}<rect y="228" width="400" height="32" fill="#060818"/><text x="14" y="249" fill="#fff" font-family="sans-serif" font-size="15" font-weight="700">${p.n} · ${LEG[i]}</text></svg>`;
+ return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg)}
+function abrir(p,chegou){const pct=Math.round(p.l*100),est=p.l<.4?'Tranquilo':p.l<.65?'Movimentado':'Lotado';
+ $('#sheet').innerHTML=`<button class="x" aria-label="Fechar">✕</button><div class="gal"></div><div class="sb">
+ <span class="tag">${p.cat}</span>${p.ev?'<span class="tag ev">Acontecendo agora</span>':''}
+ <h2>${chegou?'Você chegou: ':''}${p.n}</h2><p>${p.d}</p>
+ ${p.ev?`<p><b style="color:var(--mg)">★ ${p.ev}</b></p>`:''}
+ <div class="bar"><i style="width:${pct}%;background:${cor(p.l)};color:${cor(p.l)}"></i></div><small>${est} agora, ${pct}% da lotação (dado de exemplo)</small>
+ <p><small>📍 ${p.end}</small></p><p>💡 ${p.dica}</p>
+ <div class="row"><button class="btn" id="ir">${chegou?'Explorar outros locais':'Ir de '+MODOS[modo].n.toLowerCase()}</button></div>
+ <p><small>Fotos e textos de exemplo. Confirme horários e programação com o local.</small></p></div>`;
+ const g=$('#sheet .gal');for(let i=0;i<3;i++){const im=new Image();im.alt=`${p.n}: ${LEG[i]}`;im.loading='lazy';im.onerror=()=>{im.onerror=null;im.src=art(p,i)};im.src=`fotos/${p.id}-${i+1}.jpg`;g.append(im)}
+ $('#sheet').classList.add('on');$('#sheet').scrollTop=0;
+ $('#sheet .x').onclick=()=>$('#sheet').classList.remove('on');
+ $('#ir').onclick=()=>chegou?$('#sheet').classList.remove('on'):ir(p)}
+function info(t,b){$('#sheet').innerHTML=`<button class="x" aria-label="Fechar">✕</button><div class="sb" style="padding-top:18px"><h2>${t}</h2>${b}</div>`;$('#sheet').classList.add('on');$('#sheet .x').onclick=()=>$('#sheet').classList.remove('on')}
+
+// ---------- rotas pelas ruas reais ----------
+const hav=(a,b)=>{const r=Math.PI/180,x=Math.sin((b[1]-a[1])*r/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin((b[0]-a[0])*r/2)**2;return 12742000*Math.asin(Math.sqrt(x))};
+const brg=(a,b)=>{const r=Math.PI/180,y=Math.sin((b[0]-a[0])*r)*Math.cos(b[1]*r),x=Math.cos(a[1]*r)*Math.sin(b[1]*r)-Math.sin(a[1]*r)*Math.cos(b[1]*r)*Math.cos((b[0]-a[0])*r);return(Math.atan2(y,x)/r+360)%360};
+const PERFIL={pe:'routed-foot',carro:'routed-car',uber:'routed-car',pat:'routed-bike'};
+async function ir(p){$('#sheet').classList.remove('on');
+ const a=[me.lng,me.lat],b=[p.lng,p.lat];let pts=[a,b];
+ try{const r=await fetch(`https://routing.openstreetmap.de/${PERFIL[modo]}/route/v1/driving/${a.join(',')};${b.join(',')}?overview=full&geometries=geojson`);
+  const j=await r.json();if(j.routes&&j.routes[0])pts=j.routes[0].geometry.coordinates}catch(e){toast('Rota por ruas indisponível agora. Usando linha reta.')}
+ const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+hav(pts[i-1],pts[i]));
+ map.getSource('rota').setData({type:'Feature',geometry:{type:'LineString',coordinates:pts}});
+ run={pts,cum,p,s:0};follow=true;$('#recenter').style.display='none';
+ toast(`A caminho: ${p.n}, ${Math.max(1,Math.round(cum[cum.length-1]/MODOS[modo].v/60))} min no ritmo real`)}
+function perto(){POIS.forEach(p=>{if(!p.ev)return;const d=hav([me.lng,me.lat],[p.lng,p.lat]);
+ if(d<250&&!p.near){p.near=true;p.w.classList.add('hot');toast(`Evento perto de você: ${p.n}. Toque na luz pulsante!`);if(navigator.vibrate)navigator.vibrate(180)}
+ else if(d>450&&p.near){p.near=false;p.w.classList.remove('hot')}})}
+let last=performance.now(),zoom=16.4;
+(function tick(t){const dt=Math.min((t-last)/1000,.1);last=t;
+ if(run){run.s=Math.min(run.s+MODOS[modo].v*SPEEDUP*dt,run.cum[run.cum.length-1]);
+  let i=1;while(i<run.cum.length-1&&run.cum[i]<run.s)i++;
+  const k=(run.s-run.cum[i-1])/Math.max(1e-6,run.cum[i]-run.cum[i-1]),A=run.pts[i-1],B=run.pts[i],pos=[A[0]+(B[0]-A[0])*k,A[1]+(B[1]-A[1])*k];
+  me={lng:pos[0],lat:pos[1]};meM.setLngLat(pos);if(hav(A,B)>1)hdg=brg(A,B);perto();
+  if(follow){const dh=((hdg-map.getBearing()+540)%360)-180;zoom+=(MODOS[modo].z-zoom)*.03;map.jumpTo({center:pos,bearing:map.getBearing()+dh*.05,pitch:68,zoom})}
+  if(run.s>=run.cum[run.cum.length-1]){const p=run.p;run=null;map.getSource('rota').setData({type:'FeatureCollection',features:[]});abrir(p,true)}}
+ requestAnimationFrame(tick)})(last);
+map.on('dragstart',()=>{if(run&&follow){follow=false;$('#recenter').style.display='block'}});
+$('#recenter').onclick=()=>{follow=true;$('#recenter').style.display='none'};
+
+// ---------- interface ----------
+INT.forEach(i=>{const b=document.createElement('button');b.textContent=i;b.setAttribute('aria-pressed','false');
+ b.onclick=()=>{sel.has(i)?sel.delete(i):sel.add(i);b.setAttribute('aria-pressed',sel.has(i))};$('#chips').append(b)});
+$('#go').onclick=()=>{$('#onb').remove();POIS.forEach(p=>p.el.classList.toggle('mine',p.int.some(i=>sel.has(i))));toast('Você chegou na Rodoviária. Toque numa luz pulsante ou num local.')};
+Object.entries(MODOS).forEach(([k,v])=>{const b=document.createElement('button');b.className='glass';b.textContent=v.n;b.setAttribute('aria-pressed',k==modo);
+ b.onclick=()=>{modo=k;meEl.textContent=v.i;[...$('#modes').children].forEach(c=>c.setAttribute('aria-pressed',c==b))};$('#modes').append(b)});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
+const IC=['<path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>','<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>','<path d="M4 6h16M4 12h16M4 18h10"/>','<path d="M12 21l-8-8a5 5 0 117-7 5 5 0 117 7z"/>','<circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 4-7 8-7s8 2 8 7"/>'];
+['Mapa','Agora','Roteiros','Salvos','Perfil'].forEach((n,i)=>{const b=document.createElement('button');b.innerHTML=`<svg viewBox="0 0 24 24">${IC[i]}</svg>${n}`;
+ b.onclick=()=>{[...$('#nav').children].forEach(c=>c.removeAttribute('aria-current'));b.setAttribute('aria-current','page');
+  if(i==0)$('#sheet').classList.remove('on');
+  else if(i==1){info('Agora em Porto Alegre',POIS.filter(p=>p.ev).map(p=>`<p><button class="btn alt" style="width:100%;text-align:left;padding:10px 14px" data-id="${p.id}">★ ${p.n}: ${p.ev}</button></p>`).join(''));
+   document.querySelectorAll('#sheet [data-id]').forEach(e=>e.onclick=()=>{const p=POIS.find(x=>x.id===e.dataset.id);follow=false;map.flyTo({center:[p.lng,p.lat],zoom:17.5,pitch:70,bearing:270,duration:2500});abrir(p)})}
+  else if(i==4){info('Instalar no celular',`<p>Use o Curta Mais Poa como aplicativo, de graça, sem loja.</p>${dip?'<div class="row"><button class="btn" id="inst">Instalar agora</button></div>':''}
+   <p><small><b>Android (Chrome):</b> menu ⋮ e "Instalar app".<br><b>iPhone (Safari):</b> botão Compartilhar e "Adicionar à Tela de Início".</small></p>`);
+   const bt=$('#inst');if(bt)bt.onclick=async()=>{dip.prompt();await dip.userChoice;dip=null}}
+  else info(n,'<p>Tela prevista para a próxima fase do projeto.</p>')};
+ if(!i)b.setAttribute('aria-current','page');$('#nav').append(b)});
+if('serviceWorker'in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>

@@ -1,103 +1,33 @@
-# POA Live Map
+# Curta Mais Poa
 
-Mapa interativo em tempo real para turismo, cultura, gastronomia e eventos no Centro de Porto Alegre.
-Feito com **React Native + Expo (TypeScript)**, **Expo Router**, **react-native-maps** e **NativeWind**.
+Mapa 3D futurista e vivo de Porto Alegre: eventos, gastronomia e cultura, com rotas pelas ruas reais, luzes pulsantes de eventos e fichas com fotos. Gratuito e instalável no Android e no iPhone.
 
 ## Estrutura
-
-```
-poa-live-map/
-├── app/                    # Rotas (Expo Router)
-│   ├── _layout.tsx         # Layout raiz + GameProvider
-│   ├── index.tsx           # Tela de abertura (radar + ponto de partida)
-│   └── (tabs)/
-│       ├── _layout.tsx     # Barra de abas
-│       ├── map.tsx         # Mapa com HUD, check-in e XP
-│       └── quests.tsx      # Missões e passaporte de carimbos
-├── components/             # PlaceMarker, CategoryFilter, PlaceDetailCard
-├── store/GameContext.tsx   # XP, nível, carimbos, missões
-├── constants/theme.ts      # Cores, categorias, região inicial, estilo do mapa
-├── data/places.ts          # Dados de exemplo
-├── services/               # placesService, locationService, linking
-├── types/place.ts
-├── assets/images/          # icon, splash, adaptive-icon (substitua pelos seus)
-├── app.json  eas.json  babel.config.js  metro.config.js
-└── tailwind.config.js  global.css  tsconfig.json
-```
-
-## Como funciona o jogo
-
-- Escolha onde chegou (Rodoviária ou Aeroporto) e o mapa abre ali.
-- Toque num local e faça **check-in** para ganhar XP (50 + 25 se estiver ao vivo) e um carimbo.
-- A cada 100 XP você sobe de nível. Complete missões e preencha o passaporte.
-- `DEMO_MODE` em `store/GameContext.tsx` libera check-in de qualquer lugar. Em produção, mude para `false` (exige estar a 300 m do local).
-- O layout muda em telas largas (≥ 768 px): o card de detalhes vira painel lateral.
-
-## Versão web (GitHub Pages)
-
-O GitHub Pages só publica sites; ele **não executa** apps nativos. Por isso, se o Pages estiver configurado para publicar a branch, ele mostra apenas este README.
-Este projeto também compila para web (mapa com Leaflet + OpenStreetMap/CARTO). Para publicar:
-
-1. No GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-2. Envie o código para a branch `main` (`git push`). O workflow `.github/workflows/deploy-web.yml` gera e publica o site.
-3. Acesse `https://SEU_USUARIO.github.io/NOME_DO_REPO/` (aguarde 1 a 3 minutos).
-
-Testar a web localmente: `npx expo start --web`.
-
-## Pré-requisitos
-
-- Node.js 20 ou superior
-- Aplicativo **Expo Go** no celular (Android/iOS), ou Android Studio / Xcode para emuladores
-
-## Rodando localmente
-
-```bash
-git clone https://github.com/SEU_USUARIO/poa-live-map.git
-cd poa-live-map
-npm install
-npx expo install --fix     # alinha as versões das dependências ao SDK do Expo
-npx expo start
-```
-
-- Escaneie o QR Code com o Expo Go (Android) ou com a câmera (iOS).
-- Pressione `a` para abrir o emulador Android ou `i` para o simulador iOS (somente macOS).
-- Se o cache der problema: `npx expo start -c`.
-
-## Chave do Google Maps (Android)
-
-O mapa no Android usa Google Maps. No Expo Go ele funciona sem chave; para o build final:
-
-1. Crie um projeto no Google Cloud e ative **Maps SDK for Android** (e **Maps SDK for iOS** se for usar Google no iOS).
-2. Gere uma chave de API e substitua `COLOQUE_SUA_CHAVE_AQUI` em `app.json`.
-3. Restrinja a chave ao pacote `br.com.poalivemap.app`.
-
-No iOS o app usa Apple Maps por padrão, sem chave.
-
-## Gerando os apps nativos com EAS Build
-
-```bash
-npm install -g eas-cli
-eas login                  # conta gratuita em expo.dev
-eas build:configure
-```
-
-| Objetivo | Comando |
+| Pasta | Conteúdo |
 |---|---|
-| APK para testar no Android | `npm run build:android:preview` |
-| AAB para a Google Play | `npm run build:android:prod` |
-| iOS (TestFlight / App Store) | `npm run build:ios:prod` |
+| `web/` | O app (PWA): `index.html`, `manifest.webmanifest`, `sw.js`, `icons/`, `fotos/` |
+| `docs/` | Visão, arquitetura, design system, roadmap, instalação |
+| `services/api` | API futura (Node + TypeScript) |
+| `apps/merchant-portal` | Portal do comerciante (fase 2) |
+| `apps/mobile` | Reservado para app nativo (opcional, fase 3) |
+| `data`, `packages/shared` | Dados de exemplo e tipos |
+| `.github/workflows` | Publicação automática no GitHub Pages |
 
-Observações:
+## Rodar local
+```bash
+cd web && npx serve .      # abra o endereço mostrado
+```
 
-- O plano gratuito do EAS inclui uma cota mensal de builds, com fila mais lenta.
-- Android pode ser publicado com a taxa única da Google Play (US$ 25) e pode ser instalado via APK gratuitamente.
-- iOS exige conta **Apple Developer** (US$ 99/ano) para gerar o `.ipa` instalável. O EAS cuida dos certificados.
-- Altere `bundleIdentifier` e `package` em `app.json` se quiser outro identificador.
+## Publicar e instalar de graça
+```bash
+git init && git add . && git commit -m "Curta Mais Poa"
+git branch -M main
+git remote add origin https://github.com/SEU_USUARIO/curta-mais-poa.git
+git push -u origin main
+```
+Depois: Settings > Pages > Source "GitHub Actions". Veja `docs/05-instalar-no-celular.md`.
 
-## Próximos passos sugeridos
+## Fontes gratuitas
+MapLibre GL JS, OpenFreeMap (OpenStreetMap), imagens de satélite Esri, rotas routing.openstreetmap.de, GitHub Pages. Servem para protótipo e demonstração; revise os termos de cada serviço antes de uso comercial com muito tráfego.
 
-- Trocar `data/places.ts` por uma API (Supabase, Firebase ou REST) em `services/placesService.ts`.
-- Atualizar `isLive` e `crowd` em tempo real (Supabase Realtime, Firestore ou WebSocket).
-- Adicionar abas de Eventos e Favoritos em `app/(tabs)/`.
-- Integrar checkout de ingressos (Sympla, Eventbrite ou Mercado Pago).
-- Usar Mapbox: exige *development build* (`eas build --profile development`), pois não roda no Expo Go.
+> Lotação, eventos, textos e coordenadas são exemplos. Adicione fotos reais em `web/fotos/`.

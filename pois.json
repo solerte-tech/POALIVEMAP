@@ -1,0 +1,7 @@
+[
+ {"id":"mercado","nome":"Mercado Público","categoria":"gastronomia","lat":-30.0286,"lng":-51.2279,"lotacao":0.7},
+ {"id":"gasometro","nome":"Usina do Gasômetro","categoria":"cultura","lat":-30.0346,"lng":-51.2437,"lotacao":0.5,"evento":"Pôr do sol com música ao vivo (exemplo)"},
+ {"id":"orla","nome":"Orla do Guaíba","categoria":"natureza","lat":-30.0430,"lng":-51.2400,"lotacao":0.4},
+ {"id":"sao-pedro","nome":"Theatro São Pedro","categoria":"cultura","lat":-30.0330,"lng":-51.2300,"lotacao":0.3,"evento":"Espetáculo hoje (exemplo)"},
+ {"id":"matriz","nome":"Praça da Matriz","categoria":"cultura","lat":-30.0300,"lng":-51.2340,"lotacao":0.2}
+]
