@@ -1,0 +1,70 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{margin:0;height:100%;background:#0E3B4F}gmp-map-3d{width:100%;height:100%;display:block}
+#msg{position:fixed;inset:0;display:none;place-items:center;color:#fff;font:15px system-ui,sans-serif;padding:24px;text-align:center}</style></head>
+<body><div id="msg"></div>
+<script>
+const RAW='__KEY__',KEY=RAW==='__'+'KEY__'?new URLSearchParams(location.search).get('key'):RAW;
+const post=m=>{const s=JSON.stringify(m);if(window.ReactNativeWebView)window.ReactNativeWebView.postMessage(s);else if(parent!==window)parent.postMessage(s,'*')};
+const fail=t=>{const m=document.getElementById('msg');m.style.display='grid';m.textContent=t;post({type:'error',text:t})};
+window.gm_authFailure=()=>fail('Chave recusada pelo Google. Ative a Maps JavaScript API, o faturamento e confira as restrições da chave.');
+if(!KEY)fail('Informe a chave: abra esta página com ?key=SUA_CHAVE');
+else{const s=document.createElement('script');s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(KEY)+'&v=beta&loading=async&callback=boot';
+ s.onerror=()=>fail('Não foi possível carregar o Google Maps. Verifique a internet.');document.head.append(s)}
+
+const MODES={pe:{v:1.4,range:170,tilt:72},carro:{v:12,range:300,tilt:66},uber:{v:12,range:300,tilt:66},pat:{v:5,range:230,tilt:69}};
+const SPEEDUP=6; // acelera o deslocamento para a demonstração
+const COL=l=>l<.4?'#4FB286':l<.65?'#F2B33D':'#E0457B';
+const DEMO=[
+ {id:'mercado',name:'Mercado Público',lat:-30.0285,lng:-51.2277,crowd:.72},
+ {id:'gasometro',name:'Usina do Gasômetro',lat:-30.0340,lng:-51.2436,crowd:.5,event:'Música ao vivo no pôr do sol (exemplo)'},
+ {id:'orla',name:'Orla do Guaíba',lat:-30.0455,lng:-51.2385,crowd:.38},
+ {id:'matriz',name:'Praça da Matriz',lat:-30.0323,lng:-51.2320,crowd:.2},
+ {id:'saopedro',name:'Theatro São Pedro',lat:-30.0326,lng:-51.2313,crowd:.3,event:'Espetáculo hoje às 20h (exemplo)'}];
+const dist=(a,b)=>{const r=Math.PI/180,x=Math.sin((b.lat-a.lat)*r/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin((b.lng-a.lng)*r/2)**2;return 12742000*Math.asin(Math.sqrt(x))};
+const bearing=(a,b)=>{const r=Math.PI/180,y=Math.sin((b.lng-a.lng)*r)*Math.cos(b.lat*r),x=Math.cos(a.lat*r)*Math.sin(b.lat*r)-Math.sin(a.lat*r)*Math.cos(b.lat*r)*Math.cos((b.lng-a.lng)*r);return(Math.atan2(y,x)/r+360)%360};
+
+window.boot=async()=>{
+ const {Map3DElement,Marker3DElement,Marker3DInteractiveElement,Polyline3DElement}=await google.maps.importLibrary('maps3d');
+ const {PinElement}=await google.maps.importLibrary('marker');
+ // Câmera inicial: Usina do Gasômetro olhando para oeste, em direção ao pôr do sol no Guaíba
+ const map=new Map3DElement({mode:'HYBRID',center:{lat:-30.0340,lng:-51.2436,altitude:20},range:1100,tilt:68,heading:270});
+ document.body.append(map);
+ let me={lat:-30.0300,lng:-51.2250},modo='pe',path=[],destId=null,places=[],objs=[],routeEl=null,hdg=270,follow=false;
+ const meM=new Marker3DElement({position:{...me,altitude:4},altitudeMode:'RELATIVE_TO_GROUND',label:'Você',extruded:true});map.append(meM);
+
+ function setPlaces(list){objs.forEach(o=>o.remove());objs=[];places=list;
+  list.forEach(p=>{
+   const m=new Marker3DInteractiveElement({position:{lat:p.lat,lng:p.lng,altitude:30},altitudeMode:'RELATIVE_TO_GROUND',extruded:true,label:(p.event?'★ ':'')+p.name});
+   try{const pin=new PinElement({background:p.event?'#E0457B':COL(p.crowd==null?.3:p.crowd),borderColor:p.event?'#FF8A3D':'#fff',glyphColor:'#fff',scale:p.event?1.6:1.2});
+    const t=document.createElement('template');t.content.append(pin);m.append(t)}catch(e){}
+   m.addEventListener('gmp-click',()=>post({type:'select',id:p.id}));map.append(m);objs.push(m);
+   if(p.event){const pts=[];for(let i=0;i<=36;i++){const a=i/36*2*Math.PI;pts.push({lat:p.lat+Math.sin(a)*.0004,lng:p.lng+Math.cos(a)*.0004,altitude:2})}
+    const c=new Polyline3DElement({path:pts,strokeColor:'#FF8A3D',strokeWidth:8,altitudeMode:'RELATIVE_TO_GROUND',drawsOccludedSegments:true});map.append(c);objs.push(c)}})}
+
+ function goTo(id,pts){const p=places.find(x=>x.id===id);if(!p)return;destId=id;
+  path=pts&&pts.length?[me,...pts]:[me,{lat:p.lat,lng:p.lng}];
+  let L=0;for(let i=1;i<path.length;i++)L+=dist(path[i-1],path[i]);
+  if(routeEl)routeEl.remove();routeEl=new Polyline3DElement({path:path.map(q=>({...q,altitude:3})),strokeColor:'#FF8A3D',strokeWidth:10,altitudeMode:'RELATIVE_TO_GROUND',drawsOccludedSegments:true});map.append(routeEl);
+  follow=true;post({type:'eta',id,minutes:Math.max(1,Math.round(L/MODES[modo].v/60))})}
+
+ let last=performance.now();
+ (function tick(t){const dt=Math.min((t-last)/1000,.1);last=t;
+  if(follow){const M=MODES[modo];
+   if(path.length>1){let step=M.v*SPEEDUP*dt;
+    while(step>0&&path.length>1){const d=dist(me,path[1]);
+     if(d<=step){me={lat:path[1].lat,lng:path[1].lng};path.shift();step-=d}
+     else{const k=step/d,nx={lat:me.lat+(path[1].lat-me.lat)*k,lng:me.lng+(path[1].lng-me.lng)*k};hdg=bearing(me,nx);me=nx;step=0}}
+    if(path.length<2){if(routeEl){routeEl.remove();routeEl=null}post({type:'arrived',id:destId})}}
+   meM.position={...me,altitude:4};
+   map.center={...me,altitude:15};
+   const dh=((hdg-map.heading+540)%360)-180;map.heading=map.heading+dh*.04;
+   map.range+=(M.range-map.range)*.03;map.tilt+=(M.tilt-map.tilt)*.03}
+  requestAnimationFrame(tick)})(last);
+
+ window.__cmd=c=>{if(c.type==='places')setPlaces(c.places);else if(c.type==='mode')modo=c.mode;else if(c.type==='goTo')goTo(c.id,c.route)};
+ const onMsg=e=>{try{window.__cmd(typeof e.data==='string'?JSON.parse(e.data):e.data)}catch(_){}};
+ addEventListener('message',onMsg);document.addEventListener('message',onMsg);
+ setPlaces(DEMO);post({type:'ready'});
+};
+</script></body></html>
