@@ -13,6 +13,12 @@ Mapa 3D futurista e vivo de Porto Alegre: eventos, gastronomia e cultura, com ro
 | `data`, `packages/shared` | Dados de exemplo e tipos |
 | `.github/workflows` | Publicação automática no GitHub Pages |
 
+## Novidades da versão 3
+- Frase de abertura, clima da semana (Open-Meteo) e cartão para instalar o app.
+- Localização do dispositivo: orienta o usuário em Porto Alegre com instruções de curva a curva.
+- Mobilidade no rodapé (a pé, carro, Uber, patinete). Chamar Uber de verdade é opcional.
+- Aba Roteiros integrada ao mapa, com paradas e sugestão por perfil.
+
 ## Rodar local
 ```bash
 cd web && npx serve .      # abra o endereço mostrado
@@ -22,7 +28,7 @@ cd web && npx serve .      # abra o endereço mostrado
 ```bash
 git init && git add . && git commit -m "Curta Mais Poa"
 git branch -M main
-git remote add origin https://github.com/SEU_USUARIO/curta-mais-poa.git
+git remote add origin https://github.com/solerte-tech/Curta-mais-Poa.git
 git push -u origin main
 ```
 Depois: Settings > Pages > Source "GitHub Actions". Veja `docs/05-instalar-no-celular.md`.

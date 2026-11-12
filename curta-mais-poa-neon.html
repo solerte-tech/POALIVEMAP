@@ -10,7 +10,7 @@
 <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <style>
-:root{--bg:#060818;--p:rgba(10,14,46,.8);--cy:#00F0FF;--mg:#FF2E9A;--vi:#8A5CFF;--li:#B6FF3B;--am:#FFB020;--tx:#E8F6FF}
+:root{--bg:#060818;--p:rgba(10,14,46,.8);--cy:#00F0FF;--mg:#FF2E9A;--vi:#8A5CFF;--li:#B6FF3B;--am:#FFB020;--tx:#E8F6FF;--nv:68px}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;overflow:hidden}
 body{font-family:"Space Grotesk",system-ui,sans-serif;color:var(--tx);background:var(--bg)}
@@ -22,9 +22,24 @@ h1,h2{font-family:Orbitron,"Space Grotesk",sans-serif;letter-spacing:.02em}
 .brand{border-radius:16px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
 .brand h1{font-size:17px;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--mg));-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand span{font-size:12px;color:var(--am)}
-.modes{display:flex;gap:6px}
-.modes button{flex:1;min-height:44px;border-radius:14px;color:var(--tx);font:600 13px "Space Grotesk",sans-serif;cursor:pointer}
-.modes button[aria-pressed=true]{background:linear-gradient(90deg,var(--cy),var(--vi));color:#04101c;border-color:transparent;box-shadow:0 0 18px #00f0ffaa}
+.sun{background:none;border:0;color:var(--am);font:600 12px "Space Grotesk",sans-serif;cursor:pointer;min-height:44px}
+#guia{display:none;border-radius:16px;padding:10px 14px;gap:12px;align-items:center;justify-content:space-between;border-color:var(--li);box-shadow:0 0 20px #b6ff3b44}
+#guia b{font-size:15px}#guia small{color:#b7c6ef;display:block}
+.dock{position:absolute;z-index:3;left:50%;transform:translateX(-50%);bottom:calc(var(--nv) + env(safe-area-inset-bottom,0px) + 8px);width:calc(100% - 24px);max-width:456px;display:flex;gap:4px;padding:5px;border-radius:20px}
+.dock button{flex:1;min-height:48px;border:0;border-radius:15px;background:none;color:var(--tx);font:600 12px "Space Grotesk",sans-serif;display:grid;place-items:center;cursor:pointer}
+.dock button span{font-size:19px;line-height:1}
+.dock button[aria-pressed=true]{background:linear-gradient(90deg,var(--cy),var(--vi));color:#04101c;box-shadow:0 0 16px #00f0ffaa}
+#chamar{position:absolute;z-index:2;left:12px;bottom:calc(var(--nv) + env(safe-area-inset-bottom,0px) + 74px);min-height:44px;padding:0 16px;border-radius:22px;color:var(--li);font:600 13px "Space Grotesk",sans-serif;display:none;cursor:pointer}
+.agora{display:flex;align-items:center;gap:12px}.agora .big{font-size:46px}.tmp{font:800 30px Orbitron,sans-serif;color:var(--cy)}
+.dias{display:grid;grid-template-columns:repeat(7,minmax(54px,1fr));gap:6px;overflow-x:auto;margin:12px 0 4px;padding-bottom:4px}
+.dia{display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:14px;background:#0a0e2eaa;border:1px solid #00f0ff33;font-size:12px}
+.dia span{font-size:22px}.dia strong{font-size:15px}.dia small{color:#9db0dd;font-size:11px}
+.dica{margin-top:8px;padding:10px 12px;border-radius:12px;background:linear-gradient(90deg,#00f0ff22,#ff2e9a22);font-size:14px}
+.rt{padding:14px;border-radius:18px;margin:0 0 12px;position:relative}
+.rt h3{font-size:16px;font-family:Orbitron,sans-serif}.rt small{color:#9db0dd}
+.stops{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.stops span{font-size:12px;padding:3px 9px;border-radius:12px;background:#8a5cff44}
+.fit{position:absolute;top:12px;right:12px;font-size:11px;padding:3px 8px;border-radius:10px;background:var(--li);color:#04101c;font-weight:600}
 nav{position:absolute;z-index:3;left:0;right:0;bottom:0;display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));border-radius:20px 20px 0 0;border-bottom:0}
 nav button{flex:1;min-height:56px;border:0;background:none;color:#7f93c9;font:12px "Space Grotesk",sans-serif;display:grid;place-items:center;gap:2px;cursor:pointer}
 nav button[aria-current=page]{color:var(--cy);filter:drop-shadow(0 0 6px var(--cy))}
@@ -43,16 +58,23 @@ nav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8}
 .row{display:flex;gap:8px;margin-top:14px}
 .btn{flex:1;min-height:46px;border:0;border-radius:14px;font:600 14px "Space Grotesk",sans-serif;cursor:pointer;background:linear-gradient(90deg,var(--cy),var(--vi));color:#04101c;box-shadow:0 0 16px #00f0ff77}
 .btn.alt{background:transparent;color:var(--cy);border:1px solid var(--cy);box-shadow:none}
-#recenter{position:absolute;z-index:2;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));min-height:44px;padding:0 16px;border-radius:22px;color:var(--cy);font:600 13px "Space Grotesk",sans-serif;display:none;cursor:pointer}
-#toast{position:absolute;z-index:4;top:calc(150px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:12px 16px;border-radius:14px;max-width:88%;text-align:center;display:none;border-color:var(--mg);box-shadow:0 0 24px #ff2e9a88;font-size:14px}
-#onb{position:absolute;inset:0;z-index:6;background:radial-gradient(circle at 20% 10%,#2b1580 0,#060818 55%);padding:calc(36px + env(safe-area-inset-top,0px)) 22px 28px;display:flex;flex-direction:column;gap:16px}
-#onb>*{max-width:520px;width:100%;margin-inline:auto}
+#recenter{position:absolute;z-index:2;right:12px;bottom:calc(var(--nv) + env(safe-area-inset-bottom,0px) + 74px);min-height:44px;padding:0 16px;border-radius:22px;color:var(--cy);font:600 13px "Space Grotesk",sans-serif;display:none;cursor:pointer}
+#toast{position:absolute;z-index:9;top:calc(150px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:12px 16px;border-radius:14px;max-width:88%;text-align:center;display:none;border-color:var(--mg);box-shadow:0 0 24px #ff2e9a88;font-size:14px}
+#onb{position:absolute;inset:0;z-index:6;background:radial-gradient(circle at 20% 5%,#2b1580 0,#060818 55%);overflow-y:auto}
+#onb .wrap{max-width:520px;margin:0 auto;padding:calc(30px + env(safe-area-inset-top,0px)) 18px 160px;display:flex;flex-direction:column;gap:14px}
 #onb h1{font-size:30px;line-height:1.15;font-weight:800;background:linear-gradient(90deg,var(--cy),var(--mg),var(--li));-webkit-background-clip:text;background-clip:text;color:transparent}
-#onb p{color:#b7c6ef}
+#onb .sub{color:#b7c6ef}
+#onb .card{border-radius:20px;padding:14px}#onb h3{font-family:Orbitron,sans-serif;font-size:14px;margin-bottom:10px;color:var(--cy)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chips button{min-height:44px;padding:0 16px;border-radius:22px;border:1.5px solid #00f0ff88;background:#0a0e2e99;color:var(--tx);font:600 14px "Space Grotesk",sans-serif;cursor:pointer}
 .chips button[aria-pressed=true]{background:linear-gradient(90deg,var(--mg),var(--vi));border-color:transparent;box-shadow:0 0 16px #ff2e9a88}
-#onb .btn{margin-top:auto}
+.cta{position:fixed;left:0;right:0;bottom:0;padding:26px 18px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,#060818 40%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:7}
+.go{width:100%;max-width:484px;min-height:64px;border:0;border-radius:20px;background:linear-gradient(90deg,var(--cy),var(--vi) 60%,var(--mg));color:#04101c;display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;animation:glow 2.2s ease-in-out infinite}
+.go svg{width:28px;height:28px;fill:none;stroke:#04101c;stroke-width:2}.go b{font:800 17px Orbitron,sans-serif;display:block;text-align:left}.go small{display:block;text-align:left;font-size:12px}
+.link{background:none;border:0;color:#9db0dd;font:13px "Space Grotesk",sans-serif;min-height:44px;cursor:pointer;text-decoration:underline}
+@keyframes glow{50%{box-shadow:0 0 32px #00f0ffcc,0 0 60px #ff2e9a66}}
+.inst p{margin:6px 0;font-size:14px;line-height:1.45}.inst .row{flex-wrap:wrap}
+.inst code{font-size:12px;color:var(--li);word-break:break-all}
 button:focus-visible{outline:3px solid var(--li);outline-offset:2px}
 .pin{display:flex;align-items:center;gap:6px;border-radius:20px;color:var(--tx);padding:5px 11px 5px 7px;font:600 12px "Space Grotesk",sans-serif;cursor:pointer;white-space:nowrap;position:relative;margin-bottom:8px;background:#0a0e2eee}
 .pin::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#0a0e2e}
@@ -69,19 +91,28 @@ button:focus-visible{outline:3px solid var(--li);outline-offset:2px}
 @keyframes core{50%{transform:scale(1.3)}}
 .me{width:46px;height:46px;border-radius:50%;background:#060818;border:3px solid var(--cy);display:grid;place-items:center;font-size:22px;box-shadow:0 0 0 7px #00f0ff33,0 0 22px var(--cy)}
 .maplibregl-ctrl-attrib{background:#060818aa!important;color:#9db0dd!important}.maplibregl-ctrl-attrib a{color:var(--cy)!important}
-@media(prefers-reduced-motion:reduce){.orb b,.orb::before,.orb::after{animation:none}#sheet{transition:none}}
+@media(prefers-reduced-motion:reduce){.go{animation:none}.orb b,.orb::before,.orb::after{animation:none}#sheet{transition:none}}
 </style></head>
 <body>
 <div id="map"></div><div id="vig"></div>
-<div class="top"><div class="brand glass"><h1>CURTA MAIS POA</h1><span>Pôr do sol 18h52 (exemplo)</span></div><div class="modes" id="modes"></div></div>
-<button id="recenter" class="glass">Seguir você</button><div id="toast" class="glass"></div>
+<div class="top"><div class="brand glass"><h1>CURTA MAIS POA</h1><button class="sun" id="sun">☀️ Clima e pôr do sol</button></div><div id="guia" class="glass"></div></div>
+<button id="chamar" class="glass">Chamar Uber (opcional)</button><button id="recenter" class="glass">Seguir você</button><div id="toast" class="glass"></div>
 <div id="sheet" class="glass" role="dialog" aria-live="polite"></div>
+<div class="dock glass" id="dock" role="group" aria-label="Como você quer se mover pelo mapa"></div>
 <nav id="nav" class="glass"></nav>
-<section id="onb"><h1>Porto Alegre, num mapa vivo.</h1><p>Escolha o que você curte. Acendemos no mapa o que está acontecendo agora perto de você.</p><div class="chips" id="chips"></div><button class="btn" id="go">Explorar o mapa</button></section>
+<section id="onb"><div class="wrap">
+ <h1>Do café ao pôr do sol, é Porto Alegre.</h1>
+ <p class="sub">Seu guia de lazer, cultura e sabores. Mapa vivo, eventos e roteiros para curtir a cidade agora.</p>
+ <div class="card glass"><h3>Clima em Porto Alegre, semana completa</h3><div id="wx">Carregando o clima…</div></div>
+ <div class="card glass"><h3>O que você curte?</h3><div class="chips" id="chips"></div></div>
+ <div class="card glass inst" id="inst"></div>
+</div>
+<div class="cta"><button class="go" id="go"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg><span><b>Explorar o mapa</b><small id="gs">Vamos usar sua localização para guiar você</small></span></button><button class="link" id="sem">Continuar sem localização</button></div></section>
 <script>
 const $=s=>document.querySelector(s);
 const INT=['Gastronomia','Cultura','Música ao vivo','Pôr do sol','Em família','Gastando pouco'];
 const MODOS={pe:{n:'A pé',v:1.4,z:17.4,i:'🚶'},carro:{n:'Carro',v:11,z:16.3,i:'🚗'},uber:{n:'Uber',v:11,z:16.3,i:'🚕'},pat:{n:'Patinete',v:5,z:16.9,i:'🛴'}};
+const APP_URL='https://solerte-tech.github.io/Curta-mais-Poa/',POA={lat:-30.0346,lng:-51.2177};
 const SPEEDUP=8; // acelera a viagem na demonstração
 // Coordenadas aproximadas e textos de exemplo: confira antes de divulgar. Fotos: pasta fotos/.
 const POIS=[
@@ -92,7 +123,8 @@ const POIS=[
  {id:'matriz',n:'Praça da Matriz',cat:'Passeio histórico',lat:-30.0323,lng:-51.2320,l:.2,end:'Centro Histórico',d:'Cercada pela Catedral Metropolitana, pelo Palácio Piratini e pelo Memorial do RS.',dica:'Ótima para um passeio tranquilo a pé.',int:['Cultura','Gastando pouco','Em família']},
  {id:'orla',n:'Orla do Guaíba',cat:'Natureza e pôr do sol',lat:-30.0455,lng:-51.2385,l:.38,end:'Av. Edvaldo Pereira Paiva',d:'Calçadão à beira do Guaíba para caminhar, pedalar e ver o sol baixar.',dica:'Leve água e ficará perfeito para o fim do dia.',int:['Pôr do sol','Em família','Gastando pouco']}];
 const cor=l=>l<.4?'#B6FF3B':l<.65?'#FFB020':'#FF2E9A';
-let modo='pe',sel=new Set(),me={lng:-51.2181,lat:-30.0237},follow=false,run=null,hdg=250,dip=null;
+let modo='pe',sel=new Set(),me={lng:-51.2181,lat:-30.0237},follow=false,run=null,hdg=250,dip=null,live=false,dest=null,guide={steps:[],idx:1},total=0,rot=null,W=null;
+const byId=i=>POIS.find(p=>p.id===i);
 
 // ---------- mapa futurista ----------
 const map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/liberty',center:[me.lng,me.lat],zoom:16.4,pitch:68,bearing:250,maxPitch:85,attributionControl:{compact:true}});
@@ -135,32 +167,52 @@ function art(p,i){const [a,b]=PAL[i%3],s=p.id.length*13+i*7;let x=0,B='';
  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${a}" stop-opacity=".25"/></linearGradient></defs><rect width="400" height="260" fill="#060818"/><rect width="400" height="260" fill="url(#g)"/><circle cx="320" cy="70" r="34" fill="${a}" opacity=".9"/>${B}<rect y="228" width="400" height="32" fill="#060818"/><text x="14" y="249" fill="#fff" font-family="sans-serif" font-size="15" font-weight="700">${p.n} · ${LEG[i]}</text></svg>`;
  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg)}
 function abrir(p,chegou){const pct=Math.round(p.l*100),est=p.l<.4?'Tranquilo':p.l<.65?'Movimentado':'Lotado';
+ let ir1,extra='';
+ if(chegou&&rot){const nx=rot.r.stops[rot.i+1];ir1=nx?`Próxima parada: ${byId(nx).n}`:'Concluir roteiro'}
+ else if(chegou)ir1='Explorar outros locais';
+ else ir1=live?'Navegar até lá':'Ir de '+MODOS[modo].n.toLowerCase()+' (virtual)';
+ if(!chegou&&live)extra=`<button class="btn alt" id="prev">Prévia virtual</button>`;
+ if(!chegou&&modo==='uber')extra+=`<button class="btn alt" id="ub">Chamar Uber (opcional)</button>`;
  $('#sheet').innerHTML=`<button class="x" aria-label="Fechar">✕</button><div class="gal"></div><div class="sb">
- <span class="tag">${p.cat}</span>${p.ev?'<span class="tag ev">Acontecendo agora</span>':''}
+ <span class="tag">${p.cat}</span>${p.ev?'<span class="tag ev">Acontecendo agora</span>':''}${rot&&chegou?`<span class="tag">Parada ${rot.i+1} de ${rot.r.stops.length}</span>`:''}
  <h2>${chegou?'Você chegou: ':''}${p.n}</h2><p>${p.d}</p>
  ${p.ev?`<p><b style="color:var(--mg)">★ ${p.ev}</b></p>`:''}
  <div class="bar"><i style="width:${pct}%;background:${cor(p.l)};color:${cor(p.l)}"></i></div><small>${est} agora, ${pct}% da lotação (dado de exemplo)</small>
  <p><small>📍 ${p.end}</small></p><p>💡 ${p.dica}</p>
- <div class="row"><button class="btn" id="ir">${chegou?'Explorar outros locais':'Ir de '+MODOS[modo].n.toLowerCase()}</button></div>
+ <div class="row"><button class="btn" id="ir">${ir1}</button></div>${extra?`<div class="row">${extra}</div>`:''}
  <p><small>Fotos e textos de exemplo. Confirme horários e programação com o local.</small></p></div>`;
  const g=$('#sheet .gal');for(let i=0;i<3;i++){const im=new Image();im.alt=`${p.n}: ${LEG[i]}`;im.loading='lazy';im.onerror=()=>{im.onerror=null;im.src=art(p,i)};im.src=`fotos/${p.id}-${i+1}.jpg`;g.append(im)}
  $('#sheet').classList.add('on');$('#sheet').scrollTop=0;
  $('#sheet .x').onclick=()=>$('#sheet').classList.remove('on');
- $('#ir').onclick=()=>chegou?$('#sheet').classList.remove('on'):ir(p)}
+ $('#ir').onclick=()=>{if(chegou&&rot){rot.i++;if(rot.i>=rot.r.stops.length){rot=null;$('#sheet').classList.remove('on');toast('Roteiro concluído. Curtiu? Escolha outro!')}else ir(byId(rot.r.stops[rot.i]),!live)}
+  else if(chegou)$('#sheet').classList.remove('on');else{rot=null;ir(p,!live)}};
+ if($('#prev'))$('#prev').onclick=()=>{rot=null;ir(p,true)};
+ if($('#ub'))$('#ub').onclick=()=>chamarUber(p)}
 function info(t,b){$('#sheet').innerHTML=`<button class="x" aria-label="Fechar">✕</button><div class="sb" style="padding-top:18px"><h2>${t}</h2>${b}</div>`;$('#sheet').classList.add('on');$('#sheet .x').onclick=()=>$('#sheet').classList.remove('on')}
 
 // ---------- rotas pelas ruas reais ----------
 const hav=(a,b)=>{const r=Math.PI/180,x=Math.sin((b[1]-a[1])*r/2)**2+Math.cos(a[1]*r)*Math.cos(b[1]*r)*Math.sin((b[0]-a[0])*r/2)**2;return 12742000*Math.asin(Math.sqrt(x))};
 const brg=(a,b)=>{const r=Math.PI/180,y=Math.sin((b[0]-a[0])*r)*Math.cos(b[1]*r),x=Math.cos(a[1]*r)*Math.sin(b[1]*r)-Math.sin(a[1]*r)*Math.cos(b[1]*r)*Math.cos((b[0]-a[0])*r);return(Math.atan2(y,x)/r+360)%360};
 const PERFIL={pe:'routed-foot',carro:'routed-car',uber:'routed-car',pat:'routed-bike'};
-async function ir(p){$('#sheet').classList.remove('on');
- const a=[me.lng,me.lat],b=[p.lng,p.lat];let pts=[a,b];
- try{const r=await fetch(`https://routing.openstreetmap.de/${PERFIL[modo]}/route/v1/driving/${a.join(',')};${b.join(',')}?overview=full&geometries=geojson`);
-  const j=await r.json();if(j.routes&&j.routes[0])pts=j.routes[0].geometry.coordinates}catch(e){toast('Rota por ruas indisponível agora. Usando linha reta.')}
+const ACT={left:['⬅️','Vire à esquerda'],right:['➡️','Vire à direita'],'slight left':['↖️','Siga à esquerda'],'slight right':['↗️','Siga à direita'],'sharp left':['↩️','Curva fechada à esquerda'],'sharp right':['↪️','Curva fechada à direita'],straight:['⬆️','Siga em frente'],uturn:['🔄','Faça o retorno']};
+function guia(){const g=$('#guia');if(!dest){g.style.display='none';return}
+ const rest=run?Math.max(0,total-run.s):hav([me.lng,me.lat],[dest.lng,dest.lat])*1.2,min=Math.max(1,Math.round(rest/MODOS[modo].v/60));
+ const S=guide.steps;while(guide.idx<S.length-1&&hav([me.lng,me.lat],S[guide.idx].maneuver.location)<25)guide.idx++;
+ let ic='⬆️',tx=`Siga até ${dest.n}`,dm='';
+ if(S.length){const st=S[guide.idx],m=st.maneuver;[ic,tx]=m.type==='arrive'?['🏁','Chegada em '+dest.n]:(ACT[m.modifier]||['⬆️','Siga em frente']);if(st.name&&m.type!=='arrive')tx+=' · '+st.name;dm=`Em ${Math.round(hav([me.lng,me.lat],m.location))} m`}
+ g.style.display='flex';g.innerHTML=`<div><b>${ic} ${tx}</b><small>${dm}</small></div><div style="text-align:right"><b>${min} min</b><small>${Math.round(rest)} m</small></div>`}
+function chamarShow(){$('#chamar').style.display=dest&&modo==='uber'?'block':'none'}
+function chamarUber(p){window.open(`https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${p.lat}&dropoff[longitude]=${p.lng}&dropoff[nickname]=${encodeURIComponent(p.n)}`,'_blank')}
+$('#chamar').onclick=()=>dest&&chamarUber(dest);
+function chegou(p){dest=null;run=null;map.getSource('rota').setData({type:'FeatureCollection',features:[]});guia();chamarShow();abrir(p,true)}
+async function ir(p,sim){$('#sheet').classList.remove('on');
+ const a=[me.lng,me.lat],b=[p.lng,p.lat];let pts=[a,b],steps=[];
+ try{const r=await fetch(`https://routing.openstreetmap.de/${PERFIL[modo]}/route/v1/driving/${a.join(',')};${b.join(',')}?overview=full&geometries=geojson&steps=true`);
+  const j=await r.json(),R=j.routes&&j.routes[0];if(R){pts=R.geometry.coordinates;steps=R.legs[0].steps}}catch(e){toast('Rota por ruas indisponível agora. Usando linha reta.')}
  const cum=[0];for(let i=1;i<pts.length;i++)cum.push(cum[i-1]+hav(pts[i-1],pts[i]));
  map.getSource('rota').setData({type:'Feature',geometry:{type:'LineString',coordinates:pts}});
- run={pts,cum,p,s:0};follow=true;$('#recenter').style.display='none';
- toast(`A caminho: ${p.n}, ${Math.max(1,Math.round(cum[cum.length-1]/MODOS[modo].v/60))} min no ritmo real`)}
+ dest=p;guide={steps,idx:1};total=cum[cum.length-1];run=sim?{pts,cum,p,s:0}:null;follow=true;$('#recenter').style.display='none';
+ chamarShow();guia();toast(`${live&&!sim?'Navegando':'A caminho'}: ${p.n}, ${Math.max(1,Math.round(total/MODOS[modo].v/60))} min no ritmo real`)}
 function perto(){POIS.forEach(p=>{if(!p.ev)return;const d=hav([me.lng,me.lat],[p.lng,p.lat]);
  if(d<250&&!p.near){p.near=true;p.w.classList.add('hot');toast(`Evento perto de você: ${p.n}. Toque na luz pulsante!`);if(navigator.vibrate)navigator.vibrate(180)}
  else if(d>450&&p.near){p.near=false;p.w.classList.remove('hot')}})}
@@ -169,29 +221,82 @@ let last=performance.now(),zoom=16.4;
  if(run){run.s=Math.min(run.s+MODOS[modo].v*SPEEDUP*dt,run.cum[run.cum.length-1]);
   let i=1;while(i<run.cum.length-1&&run.cum[i]<run.s)i++;
   const k=(run.s-run.cum[i-1])/Math.max(1e-6,run.cum[i]-run.cum[i-1]),A=run.pts[i-1],B=run.pts[i],pos=[A[0]+(B[0]-A[0])*k,A[1]+(B[1]-A[1])*k];
-  me={lng:pos[0],lat:pos[1]};meM.setLngLat(pos);if(hav(A,B)>1)hdg=brg(A,B);perto();
+  me={lng:pos[0],lat:pos[1]};meM.setLngLat(pos);if(hav(A,B)>1)hdg=brg(A,B);perto();if(Math.random()<.25)guia();
   if(follow){const dh=((hdg-map.getBearing()+540)%360)-180;zoom+=(MODOS[modo].z-zoom)*.03;map.jumpTo({center:pos,bearing:map.getBearing()+dh*.05,pitch:68,zoom})}
-  if(run.s>=run.cum[run.cum.length-1]){const p=run.p;run=null;map.getSource('rota').setData({type:'FeatureCollection',features:[]});abrir(p,true)}}
+  if(run.s>=run.cum[run.cum.length-1]){chegou(run.p)}}
  requestAnimationFrame(tick)})(last);
-map.on('dragstart',()=>{if(run&&follow){follow=false;$('#recenter').style.display='block'}});
+map.on('dragstart',()=>{if(follow&&(run||live)){follow=false;$('#recenter').style.display='block'}});
 $('#recenter').onclick=()=>{follow=true;$('#recenter').style.display='none'};
 
 // ---------- interface ----------
 INT.forEach(i=>{const b=document.createElement('button');b.textContent=i;b.setAttribute('aria-pressed','false');
  b.onclick=()=>{sel.has(i)?sel.delete(i):sel.add(i);b.setAttribute('aria-pressed',sel.has(i))};$('#chips').append(b)});
-$('#go').onclick=()=>{$('#onb').remove();POIS.forEach(p=>p.el.classList.toggle('mine',p.int.some(i=>sel.has(i))));toast('Você chegou na Rodoviária. Toque numa luz pulsante ou num local.')};
-Object.entries(MODOS).forEach(([k,v])=>{const b=document.createElement('button');b.className='glass';b.textContent=v.n;b.setAttribute('aria-pressed',k==modo);
- b.onclick=()=>{modo=k;meEl.textContent=v.i;[...$('#modes').children].forEach(c=>c.setAttribute('aria-pressed',c==b))};$('#modes').append(b)});
-addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
+const noPOA=(la,ln)=>!(la>-30.30&&la<-29.90&&ln>-51.35&&ln<-51.00);
+const pedirLoc=()=>new Promise(r=>{if(!navigator.geolocation)return r(null);navigator.geolocation.getCurrentPosition(p=>r(p),()=>r(null),{enableHighAccuracy:true,timeout:10000,maximumAge:30000})});
+function watch(){navigator.geolocation.watchPosition(p=>{if(run)return;const ln=p.coords.longitude,la=p.coords.latitude;me={lng:ln,lat:la};meM.setLngLat([ln,la]);perto();
+ if(dest){guia();if(hav([ln,la],[dest.lng,dest.lat])<25)return chegou(dest)}
+ if(follow){const o={center:[ln,la],duration:900};if(dest&&p.coords.heading!=null&&!isNaN(p.coords.heading))o.bearing=p.coords.heading;map.easeTo(o)}},()=>{},{enableHighAccuracy:true,maximumAge:2000})}
+async function entrar(usar){let msg='Você chegou na Rodoviária. Toque numa luz pulsante ou num local.';
+ if(usar){$('#gs').textContent='Localizando você…';const p=await pedirLoc();
+  if(p){const la=p.coords.latitude,ln=p.coords.longitude;
+   if(noPOA(la,ln))msg='Você está fora de Porto Alegre. Começamos pela Rodoviária, como se tivesse acabado de chegar.';
+   else{me={lng:ln,lat:la};live=true;follow=true;meM.setLngLat([ln,la]);watch();
+    const n=POIS.map(q=>[hav([ln,la],[q.lng,q.lat]),q]).sort((a,b)=>a[0]-b[0])[0];msg=`Localização ativa. Mais perto de você: ${n[1].n}, a ${Math.round(n[0])} m.`}}
+  else msg='Sem acesso à localização. Começamos pela Rodoviária. Você pode ativar nas configurações do navegador.'}
+ $('#onb').remove();POIS.forEach(p=>p.el.classList.toggle('mine',p.int.some(i=>sel.has(i))));
+ map.jumpTo({center:[me.lng,me.lat],zoom:16.6,pitch:68});toast(msg)}
+$('#go').onclick=()=>entrar(true);$('#sem').onclick=()=>entrar(false);
+
+// clima da semana (Open-Meteo, gratuito, sem chave)
+const wx=c=>c===0?['☀️','Céu limpo']:c<=2?['🌤️','Sol com nuvens']:c===3?['☁️','Nublado']:c<=48?['🌫️','Neblina']:c<=57?['🌦️','Garoa']:c<=67?['🌧️','Chuva']:c<=82?['🌦️','Pancadas']:['⛈️','Tempestade'];
+function dica(){const r=W.daily.precipitation_probability_max[0],t=W.current.temperature_2m,s=W.daily.sunset[0].slice(11,16);
+ return r>=60?'Dia de chuva: aposte em cultura, cafés e no Mercado Público.':t>=28?'Calor: Orla do Guaíba e sorvete no fim da tarde.':`Boa hora para a Orla. O pôr do sol é às ${s}.`}
+function wxHTML(){if(W==='erro')return'<p><small>Clima indisponível agora. Verifique a internet.</small></p>';if(!W)return'<p><small>Carregando o clima…</small></p>';
+ const c=W.current,d=W.daily,[ic,tx]=wx(c.weather_code);
+ const dias=d.time.map((t,i)=>`<div class="dia"><b>${i?new Date(t+'T12:00').toLocaleDateString('pt-BR',{weekday:'short'}).replace('.',''):'Hoje'}</b><span>${wx(d.weather_code[i])[0]}</span><strong>${Math.round(d.temperature_2m_max[i])}°</strong><small>${Math.round(d.temperature_2m_min[i])}°</small><small>💧${d.precipitation_probability_max[i]}%</small></div>`).join('');
+ return `<div class="agora"><span class="big">${ic}</span><div><div class="tmp">${Math.round(c.temperature_2m)}°C</div><small>${tx} · sensação ${Math.round(c.apparent_temperature)}° · vento ${Math.round(c.wind_speed_10m)} km/h · umidade ${c.relative_humidity_2m}%</small></div></div><div class="dias">${dias}</div><p class="dica">${dica()}</p>`}
+async function clima(){try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${POA.lat}&longitude=${POA.lng}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunset&timezone=America%2FSao_Paulo&forecast_days=7`);W=await r.json();if(!W.current)throw 0;
+  $('#sun').textContent=`${wx(W.current.weather_code)[0]} ${Math.round(W.current.temperature_2m)}° · pôr do sol ${W.daily.sunset[0].slice(11,16)}`}catch(e){W='erro'}
+ if($('#wx'))$('#wx').innerHTML=wxHTML()}
+$('#sun').onclick=()=>info('Clima em Porto Alegre',wxHTML());clima();
+
+// instalar no celular
+const std=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+function instHTML(){return `<h3>Leve no seu celular</h3><p>Instale grátis, sem loja: vira um app na tela inicial.</p>
+ <p><b>Android (Chrome):</b> menu ⋮ e "Instalar app".<br><b>iPhone (Safari):</b> Compartilhar e "Adicionar à Tela de Início".</p>
+ <p><code>${APP_URL}</code></p><div class="row"><button class="btn" data-act="inst" ${dip?'':'hidden'}>Instalar agora</button><button class="btn alt" data-act="copy">Copiar link</button><button class="btn alt" data-act="share">Compartilhar</button></div>`}
+if(std)$('#inst').remove();else $('#inst').innerHTML=instHTML();
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;document.querySelectorAll('[data-act=inst]').forEach(b=>b.hidden=false)});
+document.addEventListener('click',async e=>{const a=e.target.closest('[data-act]');if(!a)return;const k=a.dataset.act;
+ const copy=async()=>{try{await navigator.clipboard.writeText(APP_URL);toast('Link copiado.')}catch(_){prompt('Copie o link:',APP_URL)}};
+ if(k==='inst'&&dip){dip.prompt();await dip.userChoice;dip=null;a.hidden=true}
+ else if(k==='copy')copy();
+ else if(k==='share'){navigator.share?navigator.share({title:'Curta Mais Poa',text:'Descubra Porto Alegre, do café ao pôr do sol.',url:APP_URL}).catch(()=>{}):copy()}});
+
+// mobilidade no rodapé: escolhe COMO andar no mapa. Chamar Uber de verdade é opcional.
+Object.entries(MODOS).forEach(([k,v])=>{const b=document.createElement('button');b.innerHTML=`<span>${v.i}</span>${v.n}`;b.setAttribute('aria-pressed',k==modo);b.setAttribute('aria-label','Mover-se '+v.n);
+ b.onclick=()=>{modo=k;meEl.textContent=v.i;[...$('#dock').children].forEach(c=>c.setAttribute('aria-pressed',c==b));chamarShow();if(dest)guia();
+  if(k==='uber')toast('Uber no mapa só muda como você se move na cidade virtual. Chamar o carro de verdade é opcional.')};$('#dock').append(b)});
+
+// roteiros
+const ROTEIROS=[
+ {n:'Pôr do sol no Guaíba',t:'3 h',tags:['Pôr do sol','Música ao vivo','Cultura'],stops:['mercado','gasometro','orla'],d:'Café no Mercado, música na Usina e o sol baixando na Orla.'},
+ {n:'Centro Histórico a pé',t:'2 h',tags:['Cultura','Gastando pouco'],stops:['matriz','saopedro','ccmq','mercado'],d:'Praça, teatro, poesia e bancas: o miolo da cidade em um passeio.'},
+ {n:'Poesia e palco',t:'2h30',tags:['Cultura','Música ao vivo'],stops:['ccmq','saopedro','gasometro'],d:'Da casa do poeta ao palco e ao fim de tarde no Gasômetro.'},
+ {n:'Sabores do Centro',t:'1h30',tags:['Gastronomia','Gastando pouco'],stops:['mercado','ccmq'],d:'Café, bancas e uma pausa literária.'},
+ {n:'Passeio em família',t:'3 h',tags:['Em família','Pôr do sol'],stops:['matriz','mercado','orla'],d:'Leve, a pé e com fim de tarde à beira do rio.'}];
+function roteiros(){const L=ROTEIROS.map((r,i)=>({r,i,m:r.tags.filter(t=>sel.has(t)).length})).sort((a,b)=>b.m-a.m);
+ info('Roteiros para curtir Porto Alegre',L.map(({r,i,m})=>`<div class="rt glass">${m?'<span class="fit">Combina com você</span>':''}<h3>${r.n}</h3><small>${r.t} · ${r.stops.length} paradas</small>
+  <div class="stops">${r.stops.map(x=>`<span>${byId(x).n}</span>`).join('')}</div><p>${r.d}</p><div class="row"><button class="btn" data-rt="${i}">Iniciar roteiro</button></div></div>`).join('')+'<p><small>Os roteiros usam o modo de deslocamento escolhido no rodapé.</small></p>');
+ document.querySelectorAll('[data-rt]').forEach(b=>b.onclick=()=>{rot={r:ROTEIROS[b.dataset.rt],i:0};$('#sheet').classList.remove('on');ir(byId(rot.r.stops[0]),!live)})}
 const IC=['<path d="M12 21s7-6 7-12a7 7 0 10-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>','<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>','<path d="M4 6h16M4 12h16M4 18h10"/>','<path d="M12 21l-8-8a5 5 0 117-7 5 5 0 117 7z"/>','<circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 4-7 8-7s8 2 8 7"/>'];
 ['Mapa','Agora','Roteiros','Salvos','Perfil'].forEach((n,i)=>{const b=document.createElement('button');b.innerHTML=`<svg viewBox="0 0 24 24">${IC[i]}</svg>${n}`;
  b.onclick=()=>{[...$('#nav').children].forEach(c=>c.removeAttribute('aria-current'));b.setAttribute('aria-current','page');
   if(i==0)$('#sheet').classList.remove('on');
   else if(i==1){info('Agora em Porto Alegre',POIS.filter(p=>p.ev).map(p=>`<p><button class="btn alt" style="width:100%;text-align:left;padding:10px 14px" data-id="${p.id}">★ ${p.n}: ${p.ev}</button></p>`).join(''));
    document.querySelectorAll('#sheet [data-id]').forEach(e=>e.onclick=()=>{const p=POIS.find(x=>x.id===e.dataset.id);follow=false;map.flyTo({center:[p.lng,p.lat],zoom:17.5,pitch:70,bearing:270,duration:2500});abrir(p)})}
-  else if(i==4){info('Instalar no celular',`<p>Use o Curta Mais Poa como aplicativo, de graça, sem loja.</p>${dip?'<div class="row"><button class="btn" id="inst">Instalar agora</button></div>':''}
-   <p><small><b>Android (Chrome):</b> menu ⋮ e "Instalar app".<br><b>iPhone (Safari):</b> botão Compartilhar e "Adicionar à Tela de Início".</small></p>`);
-   const bt=$('#inst');if(bt)bt.onclick=async()=>{dip.prompt();await dip.userChoice;dip=null}}
+  else if(i==4){info('Perfil',`<div class="inst">${std?'<p>App instalado. 🎉</p>':instHTML()}</div><p><small>Preferências: ${sel.size?[...sel].join(', '):'nenhuma escolhida'}.</small></p>`)}
+  else if(i==2)roteiros();
   else info(n,'<p>Tela prevista para a próxima fase do projeto.</p>')};
  if(!i)b.setAttribute('aria-current','page');$('#nav').append(b)});
 if('serviceWorker'in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
